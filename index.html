@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>homepage</title>
+    <style>
+      #container {
+        background: rgb(63, 94, 251);
+        background: radial-gradient(
+          circle,
+          rgba(63, 94, 251, 1) 0%,
+          rgba(70, 252, 75, 1) 100%
+        );
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px;
+      }
+      #container a {
+        text-decoration: none;
+        color: brown;
+        font-size: 40px;
+        font-weight: bold;
+      }
+      .none {
+        display: none;
+      }
+      #fetch {
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+          rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        width: 25%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+      #fetch h1 {
+        color: brown;
+      }
+      #fetch button {
+        color: white;
+        background-color: rgb(91, 153, 30);
+        padding: 10px;
+        font-size: 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 60%;
+      }
+      #fetch input {
+        width: 70%;
+        margin: 10px;
+        padding: 10px;
+      }
+      #allnote {
+        width: 60%;
+        margin: 20px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+          rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        text-align: center;
+      }
+      #one {
+        display: flex;
+      }
+      #logout {
+        border: none;
+        background: none;
+
+        color: brown;
+        font-weight: bold;
+        font-size: 30px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <a
+        href="
+        "
+        >Home</a
+      ><a href="">About</a><a id="login" href="login.html">LogIn </a>
+      <button id="logout">LogOut</button>
+    </div>
+
+    <div id="one">
+      <div id="fetch">
+        <h1>All Notes</h1>
+        <button id="getdata">Get Notes</button>
+        <h1>Add Notes</h1>
+        <input type="text" placeholder="Enter title" id="title" />
+        <input type="text" placeholder="Enter desc" id="desc" />
+        <input type="text " placeholder="Enter heading" id="heading" />
+        <button id="addnote">Add Notes</button>
+        <h1>Update Notes</h1>
+        <input type="text" placeholder="Enter Id" id="id" />
+        <input type="text" placeholder="Enter title" id="uptitle" />
+        <input type="text" placeholder="Enter description" id="updesc" />
+        <input type="text " placeholder="Enter heading" id="upheading" />
+        <button id="updatenote">Update Notes</button>
+
+        <h1>Delete Notes</h1>
+        <input type="text" placeholder="Enter id" id="deleteid" />
+
+        <button id="deletenote">Delete Notes</button>
+      </div>
+      <div id="allnote"></div>
+    </div>
+  </body>
+  <script>
+    let loginbtn = document.getElementById("login");
+    let logoutbtn = document.getElementById("logout");
+    let arr = localStorage.getItem("token");
+    console.log(arr);
+    if (arr) {
+      loginbtn.classList.add("none");
+    } else {
+      logoutbtn.classList.add("none");
+    }
+    logoutbtn.addEventListener("click", () => {
+      console.log("logout");
+      localStorage.removeItem("token");
+      window.location.reload();
+    });
+
+    let getdata = document.getElementById("getdata");
+
+    let div = document.getElementById("allnote");
+
+    getdata.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      fetch("http://localhost:7800/member/", {
+        method: "GET",
+        headers: {
+          authorization: `${localStorage.getItem("token")}`,
+        },
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          console.log(data);
+          display(data);
+        });
+    });
+
+    function display(data) {
+      div.innerHTML = "";
+      data.forEach((element) => {
+        let card = document.createElement("div");
+        card.setAttribute("class", "card");
+
+        let h3 = document.createElement("h3");
+        h3.innerText = element.title;
+
+        let h4 = document.createElement("h4");
+        h4.innerText = element.desc;
+
+        let p = document.createElement("p");
+        p.innerText = element.heading;
+
+        let btn = document.createElement("button");
+        btn.innerText = "Delete";
+
+        card.append(h3, h4, p, btn);
+        div.append(card);
+      });
+    }
+    let data = document.getElementById("addnote");
+    data.addEventListener("click", () => {
+      let title = document.getElementById("title").value;
+      let desc = document.getElementById("desc").value;
+      let heading = document.getElementById("heading").value;
+
+      fetch("http://localhost:7800/member/add", {
+        method: "POST",
+        headers: {
+          authorization: localStorage.getItem("token"),
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ title, desc, heading }),
+      })
+        // .then((res) => {
+        //   return res.json();
+        // })
+        .then((datas) => {
+          console.log(datas);
+          alert("Notes added successfully!!");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+
+    let update = document.getElementById("updatenote");
+    update.addEventListener("click", () => {
+      let id = document.getElementById("id").value;
+      let title = document.getElementById("uptitle").value;
+      let desc = document.getElementById("updesc").value;
+      let heading = document.getElementById("upheading").value;
+      fetch(`http://localhost:7800/member/update/${id}`, {
+        method: "PATCH",
+        headers: {
+          authorization: localStorage.getItem("token"),
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ title, desc, heading }),
+      })
+        // .then((res) => {
+        //   return res.json();
+        // })
+        .then((datas) => {
+          console.log(datas);
+          alert("Notes updated successfully!!");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+
+    let deletedata = document.getElementById("deletenote");
+    deletedata.addEventListener("click", () => {
+      let id = document.getElementById("deleteid").value;
+      fetch(`http://localhost:7800/member/delete/${id}`, {
+        method: "DELETE",
+        headers: {
+          authorization: localStorage.getItem("token"),
+          "content-type": "application/json",
+        },
+      })
+        // .then((res) => {
+        //   return res.json();
+        // })
+        .then((datas) => {
+          console.log(datas);
+          alert("Notes Deleted successfully!!");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  </script>
+</html>

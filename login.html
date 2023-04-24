@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #login {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid red;
+        height: 450px;
+        width: 400px;
+        background-color: rgb(171, 123, 216);
+        color: chartreuse;
+      }
+      #login div {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        align-items: center;
+      }
+      #login p {
+        font-size: 20px;
+        font-weight: bold;
+        margin-right: 20px;
+      }
+      #login button {
+        cursor: pointer;
+        background-color: chartreuse;
+        font-size: 20px;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 20px;
+        border: none;
+        width: 30%;
+      }
+      #login input {
+        height: 30px;
+        border: none;
+        width: 70%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login">
+      <h1>Login Here</h1>
+      <div>
+        <p>Email</p>
+        <input type="text" placeholder="enter your email" id="mail" />
+      </div>
+      <div>
+        <p>password</p>
+        <input type="text" placeholder="enter your password" id="pass" />
+      </div>
+
+      <button id="submit">submit</button>
+      <p>
+        New user?<a style="color: blue" href="./signup.html">create account</a>
+      </p>
+    </div>
+  </body>
+  <script>
+    document.getElementById("submit").addEventListener("click", () => {
+      let email = document.getElementById("mail").value;
+      let password = document.getElementById("pass").value;
+
+      let res = fetch("http://localhost:7800/user/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          console.log(data);
+          localStorage.setItem("token", data.token);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      alert("login sucessful!!");
+      window.location.href = "./index.html";
+    });
+  </script>
+</html>
